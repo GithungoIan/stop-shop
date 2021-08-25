@@ -1,0 +1,19 @@
+{
+  "name": "stop-shop",
+  "version": "1.0.0",
+  "description": "simple ecommerce web application that integrates stripe payments service",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GithungoIan/stop-shop.git"
+  },
+  "author": "Ian Githungo",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/GithungoIan/stop-shop/issues"
+  },
+  "homepage": "https://github.com/GithungoIan/stop-shop#readme"
+}
