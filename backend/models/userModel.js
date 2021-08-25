@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
+const bcrypt = require("bcryptjs");
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -47,6 +48,32 @@ const userSchema = new mongoose.Schema({
     select: false,
   },
 });
+
+// document middleware
+// encrypt user password
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
+  // hash the password
+  this.password = await bcrypt.hash(this.password, 12);
+  // delete password confirm
+  this.passwordConfirm = undefined;
+  next();
+});
+
+userSchema.pre("save", function (next) {
+  if (!this.isModified("password") || this.isNew) {
+    return next();
+  }
+  this.passwordChangedAt = Date.now() - 1000;
+  next();
+});
+
+userSchema.pre(/^find/, function (next) {
+  this.find({ active: { $ne: false } });
+  next();
+});
+
+// instance methods
 
 const User = mongoose.model("User", userSchema);
 module.exports = User;
