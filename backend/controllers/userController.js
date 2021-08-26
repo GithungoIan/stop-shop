@@ -115,3 +115,13 @@ exports.deleteUser = catchAsync(async (req, res, next) => {
     data: null,
   });
 });
+
+// delete Curret user
+exports.deleteMe = catchAsync(async (req, res, next) => {
+  await User.findByIdAndDelete(req.user.id, { active: false });
+
+  res.status(204).json({
+    status: "success",
+    data: null,
+  });
+});
