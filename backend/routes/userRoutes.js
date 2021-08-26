@@ -15,6 +15,13 @@ router.patch("/resetPassword/:token", authController.resetPassword);
 router.use(authController.protect);
 
 router.patch("/updateMyPassword", authController.updatePassword);
+router.patch(
+  "/updateMe",
+  userController.uploadUserPhoto,
+  userController.resizeUserPhoto,
+  userController.updateMe
+);
+router.delete("/deleteMe", userController.deleteMe);
 
 // restrict only to admin
 router.use(authController.restrictTo("admin"));
@@ -23,7 +30,6 @@ router.route("/").get(userController.getAllUsers);
 router
   .route("/:id")
   .get(userController.getUser)
-  .patch(userController.updateMe)
   .delete(userController.deleteUser);
 
 module.exports = router;
