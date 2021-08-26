@@ -3,6 +3,7 @@ const AppError = require("../utils/appError");
 const catchAsync = require("../utils/catchAsync");
 const Email = require("../utils/email");
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 
 // signup
 exports.signup = catchAsync(async (req, res, next) => {
@@ -124,6 +125,33 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
 });
 
 // reset password
+exports.resetPassword = catchAsync(async (req, res, next) => {
+  // get user based on the token
+  const hashedToken = crypto
+    .createHash("sha256")
+    .update(req.params.token)
+    .digest("hex");
+
+  const user = await User.findOne({
+    passwordResetToken: hashedToken,
+    passwordResetExpires: { $gt: Date.now() },
+  });
+
+  // if token has not expired, and there is  a user, set the new password
+  if (!user) {
+    return next(new AppError("Token is invalid or has expired", 400));
+  }
+
+  user.password = req.body.password;
+  user.passwordConfirm = req.body.passwordConfirm;
+  user.passwordResetToken = undefined;
+  user.passwordResetExpires = undefined;
+  await user.save();
+
+  // log the user in, send jwt
+  createPasswordResetToken(user, 200, req, res);
+});
+
 // update password
 // protect
 // restrict to
