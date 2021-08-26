@@ -86,6 +86,43 @@ exports.logout = (req, res) => {
 };
 
 // forgot password
+exports.forgotPassword = catchAsync(async (req, res, next) => {
+  // get yser based on posted email
+  const user = await User.findOne({ email: req.body.email });
+  if (!user) {
+    return next(new AppError("There is no user with that email address", 404));
+  }
+
+  // genereate the random reset token
+  const resetToken = user.createPasswordResetToken();
+  await user.save({ validateBeforeSave: false });
+
+  // sent it to the user's email
+  try {
+    const restUrl = `${req.protocal}://${req.get(
+      "host"
+    )}/api/v1/users/resetPassword/${resetToken}`;
+    await new Email(user, restUrl).sendPasswordReset();
+
+    res.status(200).json({
+      status: "success",
+      message: "Token sent to email",
+    });
+  } catch (err) {
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+
+    await user.save({ validateBeforeSave: false });
+
+    return next(
+      new AppError(
+        "There was an error sending the email. Please try again later!",
+        500
+      )
+    );
+  }
+});
+
 // reset password
 // update password
 // protect
